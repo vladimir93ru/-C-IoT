@@ -1,0 +1,34 @@
+const int greenPin = 2;
+const int yellowPin = 3;
+const int redPin = 4;
+
+void setup() {
+  pinMode(greenPin, OUTPUT);
+  pinMode(yellowPin, OUTPUT);
+  pinMode(redPin, OUTPUT);
+}
+
+void loop() {
+  // Зеленый сигнал
+  digitalWrite(greenPin, HIGH);
+  delay(5000); // Зеленый горит 5 секунд
+
+  // Зеленый мигающий сигнал
+  for (int i = 0; i < 3; i++) {
+    digitalWrite(greenPin, LOW);
+    delay(500);
+    digitalWrite(greenPin, HIGH);
+    delay(500);
+  }
+  digitalWrite(greenPin, LOW);
+
+  // Желтый сигнал
+  digitalWrite(yellowPin, HIGH);
+  delay(2000); // Желтый горит 2 секунды
+  digitalWrite(yellowPin, LOW);
+
+  // Красный сигнал
+  digitalWrite(redPin, HIGH);
+  delay(5000); // Красный горит 5 секунд
+  digitalWrite(redPin, LOW);
+}
