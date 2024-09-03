@@ -1,0 +1,29 @@
+#define LED_PIN   13
+
+void setup() {
+    // Инициализация пина светодиода как выхода
+    pinMode(LED_PIN, OUTPUT);
+    
+    // Инициализация последовательного порта
+    Serial.begin(115200);
+    
+    // Приветственное сообщение
+    Serial.println("Введите '1' для включения светодиода и '0' для выключения.");
+}
+
+void loop() {
+    // Проверяем, есть ли данные в последовательном порту
+    if (Serial.available()) {
+        char command = Serial.read(); // Читаем команду
+
+        if (command == '1') {
+            digitalWrite(LED_PIN, HIGH); // Включаем светодиод
+            Serial.println("Светодиод включен.");
+        } else if (command == '0') {
+            digitalWrite(LED_PIN, LOW); // Выключаем светодиод
+            Serial.println("Светодиод выключен.");
+        } else {
+            Serial.println("Некорректная команда. Введите '1' или '0'.");
+        }
+    }
+}
