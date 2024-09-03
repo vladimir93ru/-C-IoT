@@ -1,0 +1,59 @@
+const int greenPin = 2;
+const int yellowPin = 3;
+const int redPin = 4;
+const int buttonPin = 5;
+
+bool buttonPressed = false;
+unsigned long lastDebounceTime = 0;
+unsigned long debounceDelay = 50;
+
+void setup() {
+  pinMode(greenPin, OUTPUT);
+  pinMode(yellowPin, OUTPUT);
+  pinMode(redPin, OUTPUT);
+  pinMode(buttonPin, INPUT_PULLUP);
+}
+
+void loop() {
+  unsigned long currentTime = millis();
+
+  // Проверка состояния кнопки
+  int buttonState = digitalRead(buttonPin);
+
+  if (buttonState == LOW && (currentTime - lastDebounceTime) > debounceDelay) {
+    buttonPressed = true;
+    lastDebounceTime = currentTime;
+  }
+
+  if (buttonPressed) {
+    // Режим для пешеходов
+    digitalWrite(greenPin, LOW);
+    digitalWrite(yellowPin, HIGH);
+    delay(1000); // Мигающий желтый
+    digitalWrite(yellowPin, LOW);
+    digitalWrite(redPin, HIGH);
+    delay(5000); // Красный свет
+    digitalWrite(redPin, LOW);
+    buttonPressed = false;
+  } else {
+    // Обычный режим светофора
+    digitalWrite(greenPin, HIGH);
+    delay(5000); // Зеленый свет
+
+    // Зеленый мигающий
+    for (int i = 0; i < 3; i++) {
+      digitalWrite(greenPin, LOW);
+      delay(500);
+      digitalWrite(greenPin, HIGH);
+      delay(500);
+    }
+
+    digitalWrite(greenPin, LOW);
+    digitalWrite(yellowPin, HIGH);
+    delay(2000); // Желтый свет
+    digitalWrite(yellowPin, LOW);
+    digitalWrite(redPin, HIGH);
+    delay(5000); // Красный свет
+    digitalWrite(redPin, LOW);
+  }
+}
