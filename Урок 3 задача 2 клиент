@@ -1,0 +1,84 @@
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <unistd.h>
+
+#define BUFFER_SIZE 1024
+#define SOP 0x7E
+#define EOP 0x7E
+#define ESC 0x7D
+
+void byte_unstuffing(char *stuffed_data, int len, char *data) {
+    int data_len = 0;
+    for (int i = 0; i < len; i++) {
+        if (stuffed_data[i] == ESC) {
+            i++;
+            data[data_len++] = stuffed_data[i] ^ 0x20;
+        } else {
+            data[data_len++] = stuffed_data[i];
+        }
+    }
+    data[data_len] = '\0';
+}
+
+int main() {
+    int client_fd;
+    struct sockaddr_in server_addr;
+    char buffer[BUFFER_SIZE];
+    char stuffed_buffer[BUFFER_SIZE];
+
+    // Создание сокета
+    client_fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (client_fd < 0) {
+        perror("Ошибка создания сокета");
+        exit(1);
+    }
+
+    // Установка адреса сервера
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(8080);
+    inet_pton(AF_INET, "127.0.0.1", &server_addr.sin_addr);
+
+    // Подключение к серверу
+    if (connect(client_fd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
+        perror("Ошибка подключения к серверу");
+        exit(1);
+    }
+
+    printf("Подключение к серверу установлено. Обмен данными...\n");
+
+    while (true) {
+        // Ввод данных от пользователя
+        printf("Введите данные: ");
+        fgets(buffer, BUFFER_SIZE, stdin);
+
+        // Стуффирование данных
+        byte_unstuffing(buffer, strlen(buffer), stuffed_buffer);
+
+        // Отправка данных на сервер
+        send(client_fd, stuffed_buffer, strlen(stuffed_buffer), 0);
+
+        // Чтение ответа от сервера
+        int bytes_received = read(client_fd, buffer, BUFFER_SIZE);
+        if (bytes_received < 0) {
+            perror("Ошибка чтения данных");
+            break;
+        }
+
+        // Дестуффирование данных
+        char unstuffed_buffer[BUFFER_SIZE];
+        byte_unstuffing(buffer, bytes_received, unstuffed_buffer);
+
+        printf("Ответ сервера: %s\n", unstuffed_buffer);
+
+        // Закрытие сокета
+        close(client_fd);
+        break;
+    }
+
+    return 0;
+}
